@@ -19,7 +19,7 @@ class AnimeSama:
         self.client = client or AsyncClient()
 
     def _yield_catalogues_from(self, html: str) -> Generator[Catalogue]:
-        text_without_script = re.sub(r"<script[\W\w]+?</script>", "", html)
+        text_without_script = re.sub(r"<script.+?</script>", "", html)
         for match in re.finditer(
             rf"href=\"({self.site_url}catalogue/.+)\"[\W\w]+?src=\"(.+)\"[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<",
             text_without_script,
