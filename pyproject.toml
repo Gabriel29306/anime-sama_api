@@ -7,7 +7,8 @@ name = "anime-sama_api"
 version = "0.2.0-1"
 description = "Api for anime-sama.fr"
 authors = [
-    {name = "NiniKo", email = "pcninik@gmail.com"}
+    {name = "NiniKo", email = "pcninik@gmail.com"},
+    {name = "EvilRave", email = "ggkervran@gmail.com"}
 ]
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -35,24 +36,7 @@ dependencies = [
 anime-sama = "anime_sama_api:main"
 
 [project.urls]
-Repository = "https://github.com/Sky-NiniKo/anime-sama_downloader/"
-
-[project.optional-dependencies]
-cli = [
-    "rich>=13.9.4",
-    "tomli>=2.2.1 ; python_full_version < '3.11'",
-    "yt-dlp>=2025.2.19",
-]
-
-[dependency-groups]
-dev = [
-    "black>=25.1.0",
-    "mypy>=1.15.0",
-    "pytest>=8.3.4",
-    "pytest-asyncio>=0.25.3",
-    "pytest-cov>=6.0.0",
-    "yt-dlp-types>=0.0.14",
-]
+Repository = "https://github.com/Gabriel29306/anime-sama_api"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
