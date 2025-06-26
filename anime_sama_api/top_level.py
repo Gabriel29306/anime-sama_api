@@ -70,7 +70,6 @@ class AnimeSama:
         for lang in langs:
             suffix += f"&lang[]={lang}"
         query_url = f"{self.site_url}catalogue/?search={quote_plus(query)}{suffix}"
-        logger.warning(f"Searching for '{query}' with types {types} at {query_url}")
         response = (
             await self.client.get(query_url)
         ).raise_for_status()
