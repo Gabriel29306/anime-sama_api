@@ -21,6 +21,8 @@ class AnimeSama:
     def __init__(self, site_url: str, client: AsyncClient | None = None) -> None:
         if not site_url.startswith("http"):
             site_url = f"https://{site_url}"
+        if not site_url.endswith("/"):
+            site_url += "/"
         self.site_url = site_url
         self.client = client or AsyncClient()
 
