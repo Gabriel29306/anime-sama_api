@@ -65,7 +65,7 @@ class AnimeSama:
                 client=self.client,
             )
 
-    async def search(self, query: str, types: list[SearchType] = [], langs: list[SearchLangs] = []) -> list[Catalogue]:
+    async def search(self, query: str, types: list[SearchType] = [], langs: list[SearchLangs] = [], limit: int | None = None) -> list[Catalogue]:
         suffix: str = ""
         for type in types:
             suffix += f"&type[]={type}"
@@ -78,6 +78,8 @@ class AnimeSama:
 
 
         last_page: int = int(re.findall(r"page=(\d+)", response.text)[-1])
+        if limit is not None:
+            last_page = min((limit // 48) + 1 if limit % 48 else (limit // 48), last_page)
 
         responses: list[Response] = [response] + await asyncio.gather(
             *(
@@ -93,7 +95,7 @@ class AnimeSama:
 
             catalogues += list(self._yield_catalogues_from(response.text))
 
-        return catalogues
+        return catalogues[:limit] if limit is not None else catalogues
 
     async def search_iter(self, query: str) -> AsyncIterator[Catalogue]:
         response: Response = (
