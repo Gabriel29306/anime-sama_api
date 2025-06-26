@@ -1,6 +1,9 @@
 # Anime-Sama API
 
-An API for anime-sama.fr, also provides a CLI to download videos.
+> [!IMPORTANT]  
+> This is not the original package. The original one is from Sky-NiniKo on [Github](https://github.com/Sky-NiniKo/anime-sama_api)
+
+An API for `anime-sama.fr`.
 
 I have implemented all the features I care about. This project is now in maintenance mode.
 

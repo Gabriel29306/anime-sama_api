@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "anime-sama_api"
+name = "anime_sama_api"
 version = "0.2.0-1"
 description = "Api for anime-sama.fr"
 authors = [
