@@ -16,7 +16,7 @@ Requirements:
 You can simply install it with (note that you can use tools like pipx to isolate the installation):
 
 ```bash
-pip install anime-sama-api
+pip install anime-sama-apis
 ```
 
 ## For developers
