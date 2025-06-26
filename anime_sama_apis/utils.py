@@ -30,7 +30,7 @@ def remove_some_js_comments(string: str):
 
 
 # TODO: this callback_when_false is curse, should be remove
-def is_Literal(value, Lit, callback_when_false=lambda _: None):
+def is_literal(value, Lit, callback_when_false=lambda _: None):
     if value in get_args(Lit):
         return True
     callback_when_false(value)
@@ -40,4 +40,4 @@ def is_Literal(value, Lit, callback_when_false=lambda _: None):
 def filter_literal(
     iterable: Iterable, Lit: T, callback_when_false=lambda _: None
 ) -> list[T]:
-    return [value for value in iterable if is_Literal(value, Lit, callback_when_false)]
+    return [value for value in iterable if is_literal(value, Lit, callback_when_false)]
