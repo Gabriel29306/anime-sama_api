@@ -1,5 +1,5 @@
 import re
-from typing import TypeVar, get_args
+from typing import TypeVar, get_args, Callable
 from itertools import zip_longest
 from collections.abc import Iterable
 
@@ -28,16 +28,14 @@ def remove_some_js_comments(string: str):
     string = re.sub(r"\/\*.*?\*\/", "", string)  # Remove /* ... */
     return re.sub(r"<!--.*?-->", "", string)  # Remove <!-- ... -->
 
-
-# TODO: this callback_when_false is curse, should be remove
-def is_literal(value, Lit, callback_when_false=lambda _: None):
-    if value in get_args(Lit):
+def is_literal(value, lit, callback: Callable[[T], None]) -> bool:
+    if value in get_args(lit):
         return True
-    callback_when_false(value)
+    callback(value)
     return False
 
 
 def filter_literal(
-    iterable: Iterable, Lit: T, callback_when_false=lambda _: None
+    iterable: Iterable, lit: T, callback: Callable[[T], None]
 ) -> list[T]:
-    return [value for value in iterable if is_literal(value, Lit, callback_when_false)]
+    return [value for value in iterable if is_literal(value, lit, callback)]

@@ -35,17 +35,17 @@ class Catalogue:
             languages = []
 
         self.url = url + "/" if url[-1] != "/" else url
-        self.site_url = "/".join(url.split("/")[:3]) + "/"
-        self.client = client or AsyncClient()
+        self.site_url: str = "/".join(url.split("/")[:3]) + "/"
+        self.client: AsyncClient = client or AsyncClient()
 
-        self.name = name or url.split("/")[-2]
+        self.name: str = name or url.split("/")[-2]
 
-        self._page = None
-        self.alternative_names = alternative_names
-        self.genres = genres
-        self.categories = categories
-        self.languages = languages
-        self.image_url = image_url
+        self._page: str | None = None
+        self.alternative_names: list[str] = alternative_names
+        self.genres: list[str] = genres
+        self.categories: list[Category] = categories
+        self.languages: list[Lang] = languages
+        self.image_url: str = image_url
 
     async def page(self) -> str:
         if self._page is not None:
@@ -61,7 +61,7 @@ class Catalogue:
         return self._page
 
     async def seasons(self) -> list[Season]:
-        page_without_comments = remove_some_js_comments(string=await self.page())
+        page_without_comments: str = remove_some_js_comments(string=await self.page())
 
         seasons = re.findall(
             r'panneauAnime\("(.+?)", *"(.+?)(?:vostfr|vf)"\);', page_without_comments
@@ -96,7 +96,7 @@ class Catalogue:
         return search[0]
 
     async def synopsis(self) -> str:
-        search = re.findall(r"Synopsis.+?>(.+)<", await self.page())
+        search: list[str] = re.findall(r"Synopsis.+?>(.+)<", await self.page())
 
         if not search:
             return ""

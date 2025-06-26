@@ -3,11 +3,11 @@ from dataclasses import dataclass, replace
 from functools import reduce
 import re
 import asyncio
-from typing import get_args
+from typing import LiteralString, get_args
 
-from httpx import AsyncClient
+from httpx import AsyncClient, Response
 
-from .langs import LangId, lang2ids, flagid2lang
+from .langs import FlagId, LangId, lang2ids, flagid2lang
 from .episode import Episode, Players, Languages
 from .utils import remove_some_js_comments, zip_varlen, split_and_strip
 
@@ -27,29 +27,29 @@ class Season:
         serie_name="",
         client: AsyncClient | None = None,
     ) -> None:
-        self.url = url
-        self.site_url = "/".join(url.split("/")[:3]) + "/"
+        self.url: str = url
+        self.site_url: str = "/".join(url.split("/")[:3]) + "/"
 
-        self.name = name or url.split("/")[-2]
-        self.serie_name = serie_name or url.split("/")[-3]
+        self.name: str = name or url.split("/")[-2]
+        self.serie_name: str = serie_name or url.split("/")[-3]
 
-        self.client = client or AsyncClient()
+        self.client: AsyncClient = client or AsyncClient()
 
     async def get_all_pages(self) -> list[SeasonLangPage]:
-        async def process_page(lang_id: LangId):
-            page_url = self.url + lang_id + "/"
-            response = await self.client.get(page_url)
+        async def process_page(lang_id: LangId) -> SeasonLangPage:
+            page_url: str = self.url + lang_id + "/"
+            response: Response = await self.client.get(page_url)
 
             if not response.is_success:
                 return SeasonLangPage(lang_id=lang_id)
 
-            html = response.text
-            match_url = re.search(r"episodes\.js\?filever=\d+", html)
+            html: str = response.text
+            match_url: re.Match[str] | None = re.search(r"episodes\.js\?filever=\d+", html)
 
             if not match_url:
                 return SeasonLangPage(lang_id=lang_id)
 
-            episodes_js = await self.client.get(page_url + match_url.group(0))
+            episodes_js: Response = await self.client.get(page_url + match_url.group(0))
 
             if not episodes_js.is_success:
                 return SeasonLangPage(lang_id=lang_id)
@@ -58,12 +58,13 @@ class Season:
                 lang_id=lang_id, html=html, episodes_js=episodes_js.text
             )
 
-        pages = await asyncio.gather(
-            *(process_page(lang_id) for lang_id in get_args(LangId))
+        pages: list[SeasonLangPage] = await asyncio.gather(
+            *(process_page(lang_id) for lang_id in get_args(LangId)),
+            return_exceptions=False
         )
-        pages_dict = {page.lang_id: page for page in pages}
+        pages_dict: dict[str, SeasonLangPage] = {page.lang_id: page for page in pages}
         if pages_dict["vostfr"].html:
-            flag_id_vo = re.findall(
+            flag_id_vo: FlagId = re.findall(
                 r"src=\".+flag_(.+?)\.png\".*?[\n\t]*<p.*?>VO</p>",
                 remove_some_js_comments(pages_dict["vostfr"].html),
             )[0]
@@ -78,7 +79,7 @@ class Season:
 
     # TODO: Refactor
     def _get_players_from(self, page: SeasonLangPage) -> list[Players]:
-        players_list = re.findall(
+        players_list: list[str] = re.findall(
             r"eps(\d+) ?= ?\[(.+?)\]", remove_some_js_comments(page.episodes_js)
         )
         players_list = sorted(players_list, key=lambda tuple: tuple[0])
@@ -96,12 +97,12 @@ class Season:
             page.html,
             re.DOTALL,
         )[-1]
-        functions_list = split_and_strip(functions, (";", "\n"))[:-1]
+        functions_list: list[str] = split_and_strip(functions, (";", "\n"))[:-1]
 
-        def padding(n: int):
+        def padding(n: int) -> LiteralString:
             return " " * (len(str(number_of_episodes_max)) - len(str(n)))
 
-        def episode_name_range(*args):
+        def episode_name_range(*args) -> list[str]:
             return [f"Episode {n}{padding(n)}" for n in range(*args)]
 
         episodes_name: list[str] = []
@@ -166,9 +167,12 @@ class Season:
         to a language while preserving the relative order of names.
         This function is intended to be used with reduce.
         """
+        page: SeasonLangPage 
+        names: list[str]
+        players_list: list[Players]
         page, names, players_list = new  # Unpack args. This is due to reduce
 
-        fusion = []
+        fusion: list[tuple[str, Languages]] = []
         curr_done = 0
         for name_new, players in zip(names, players_list):
             for pos, (name_current, languages) in enumerate(current[curr_done:]):
@@ -183,9 +187,9 @@ class Season:
         return fusion
 
     async def episodes(self) -> list[Episode]:
-        pages = await self.get_all_pages()
+        pages: list[SeasonLangPage] = await self.get_all_pages()
 
-        players_list = [self._get_players_from(page) for page in pages]
+        players_list: list[list[Players]] = [self._get_players_from(page) for page in pages]
 
         number_of_episodes_max = max(
             len(episodes_page) for episodes_page in players_list

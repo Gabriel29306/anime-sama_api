@@ -5,7 +5,7 @@ from urllib.parse import quote_plus
 import logging
 import re
 
-from httpx import AsyncClient
+from httpx import AsyncClient, Response
 
 from .langs import Lang
 from .utils import filter_literal
@@ -23,11 +23,11 @@ class AnimeSama:
             site_url = f"https://{site_url}"
         if not site_url.endswith("/"):
             site_url += "/"
-        self.site_url = site_url
-        self.client = client or AsyncClient()
+        self.site_url: str = site_url
+        self.client: AsyncClient = client or AsyncClient()
 
     def _yield_catalogues_from(self, html: str) -> Generator[Catalogue]:
-        text_without_script = re.sub(r"<script.+?</script>", "", html)
+        text_without_script: str = re.sub(r"<script.+?</script>", "", html)
         for match in re.finditer(
             rf"href=\"({self.site_url}catalogue/.+)\".+?src=\"(.+)\".+?>(.*)\n?<.+?>(.*)\n?<.+?>(.*)\n?<.+?>(.*)\n?<.+?>(.*)\n?<",
             text_without_script
@@ -42,7 +42,7 @@ class AnimeSama:
             categories = categories.split(", ") if categories else []
             languages = languages.split(", ") if languages else []
 
-            def not_in_literal(value):
+            def not_in_literal(value) -> None:
                 logger.warning(
                     f"Error while parsing '{value}'. \nPlease report this to the developer with the serie you are trying to access."
                 )
@@ -66,27 +66,27 @@ class AnimeSama:
             )
 
     async def search(self, query: str, types: list[SearchType] = [], langs: list[SearchLangs] = []) -> list[Catalogue]:
-        suffix = ""
+        suffix: str = ""
         for type in types:
             suffix += f"&type[]={type}"
         for lang in langs:
             suffix += f"&lang[]={lang}"
-        query_url = f"{self.site_url}catalogue/?search={quote_plus(query)}{suffix}"
+        query_url: str = f"{self.site_url}catalogue/?search={quote_plus(query)}{suffix}"
 
         response: Response = await self.client.get(query_url)
         response.raise_for_status()
 
 
-        last_page = int(re.findall(r"page=(\d+)", response.text)[-1])
+        last_page: int = int(re.findall(r"page=(\d+)", response.text)[-1])
 
-        responses = [response] + await asyncio.gather(
+        responses: list[Response] = [response] + await asyncio.gather(
             *(
                 self.client.get(f"{self.site_url}catalogue/?search={query}&page={num}")
                 for num in range(2, last_page + 1)
             )
         )
 
-        catalogues = []
+        catalogues: list[Catalogue] = []
         for response in responses:
             if not response.is_success:
                 continue
@@ -96,7 +96,7 @@ class AnimeSama:
         return catalogues
 
     async def search_iter(self, query: str) -> AsyncIterator[Catalogue]:
-        response = (
+        response: Response = (
             await self.client.get(f"{self.site_url}catalogue/?search={query}")
         ).raise_for_status()
 
