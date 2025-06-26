@@ -1,6 +1,6 @@
 from pathlib import Path
 from anime_sama_api.cli.downloader import multi_download, download
-from anime_sama_api.episode import Episode, Languages, Players
+from anime_sama_apis.episode import Episode, Languages, Players
 
 
 def test_multi_download():

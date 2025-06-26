@@ -1,6 +1,6 @@
 import pytest
 
-from anime_sama_api.top_level import AnimeSama
+from anime_sama_apis.top_level import AnimeSama
 from .data import catalogue_data
 
 pytest_plugins = ("pytest_asyncio",)

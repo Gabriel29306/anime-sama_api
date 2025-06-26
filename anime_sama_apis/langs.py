@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     import httpx
 
-    from anime_sama_api.top_level import AnimeSama
+    from anime_sama_apis.top_level import AnimeSama
 
     SCRIPT_VIDEO_URL = "https://anime-sama.fr/js/contenu/script_videos.js"
     page = httpx.get(SCRIPT_VIDEO_URL).text

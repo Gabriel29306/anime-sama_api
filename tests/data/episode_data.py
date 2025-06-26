@@ -1,4 +1,4 @@
-from anime_sama_api.episode import Episode
+from anime_sama_apis.episode import Episode
 
 one_piece_season1 = [
     Episode(

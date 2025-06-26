@@ -3,7 +3,7 @@ from typing import Literal
 
 from httpx import AsyncClient
 
-from anime_sama_api.langs import Lang
+from anime_sama_apis.langs import Lang
 
 from .utils import remove_some_js_comments
 from .season import Season

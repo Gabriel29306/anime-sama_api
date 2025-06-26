@@ -1,4 +1,4 @@
-from anime_sama_api.catalogue import Catalogue
+from anime_sama_apis.catalogue import Catalogue
 
 
 one_piece = Catalogue("https://anime-sama.fr/catalogue/one-piece/")

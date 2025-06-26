@@ -1,5 +1,5 @@
 import asyncio
-from anime_sama_api import main, AnimeSama
+from anime_sama_apis import main, AnimeSama
 from anime_sama_api.cli.utils import print_selection
 from rich import print
 
