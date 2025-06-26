@@ -1,5 +1,7 @@
 import asyncio
 from collections.abc import AsyncIterator, Generator
+from typing import Literal
+from urllib.parse import quote_plus
 import logging
 import re
 
@@ -9,12 +11,16 @@ from .langs import Lang
 from .utils import filter_literal
 from .catalogue import Catalogue, Category
 
+type SearchType = Literal["Anime"] | Literal["Film"] | Literal["Scans"] | Literal["Autres"]
+type SearchLangs = Literal["VOSTFR", "VASTFR", "VF"]
 
 logger = logging.getLogger(__name__)
 
 
 class AnimeSama:
     def __init__(self, site_url: str, client: AsyncClient | None = None) -> None:
+        if not site_url.startswith("http"):
+            site_url = f"https://{site_url}"
         self.site_url = site_url
         self.client = client or AsyncClient()
 
@@ -57,9 +63,16 @@ class AnimeSama:
                 client=self.client,
             )
 
-    async def search(self, query: str) -> list[Catalogue]:
+    async def search(self, query: str, types: list[SearchType] = [], langs: list[SearchLangs] = []) -> list[Catalogue]:
+        suffix = ""
+        for type in types:
+            suffix += f"&type[]={type}"
+        for lang in langs:
+            suffix += f"&lang[]={lang}"
+        query_url = f"{self.site_url}catalogue/?search={quote_plus(query)}{suffix}"
+        logger.warning(f"Searching for '{query}' with types {types} at {query_url}")
         response = (
-            await self.client.get(f"{self.site_url}catalogue/?search={query}")
+            await self.client.get(query_url)
         ).raise_for_status()
 
         last_page = int(re.findall(r"page=(\d+)", response.text)[-1])
