@@ -72,9 +72,10 @@ class AnimeSama:
         for lang in langs:
             suffix += f"&lang[]={lang}"
         query_url = f"{self.site_url}catalogue/?search={quote_plus(query)}{suffix}"
-        response = (
-            await self.client.get(query_url)
-        ).raise_for_status()
+
+        response: Response = await self.client.get(query_url)
+        response.raise_for_status()
+
 
         last_page = int(re.findall(r"page=(\d+)", response.text)[-1])
 
