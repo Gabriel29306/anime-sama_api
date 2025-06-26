@@ -1,6 +1,6 @@
 import asyncio
 from collections.abc import AsyncIterator, Generator
-from typing import Literal
+from typing import Literal, TypeAlias
 from urllib.parse import quote_plus
 import logging
 import re
@@ -11,8 +11,8 @@ from .langs import Lang
 from .utils import filter_literal
 from .catalogue import Catalogue, Category
 
-type SearchType = Literal["Anime"] | Literal["Film"] | Literal["Scans"] | Literal["Autres"]
-type SearchLangs = Literal["VOSTFR", "VASTFR", "VF"]
+SearchType: TypeAlias = Literal["Anime", "Film", "Scans", "Autres"]
+SearchLangs: TypeAlias = Literal["VOSTFR", "VASTFR", "VF"]
 
 logger = logging.getLogger(__name__)
 
