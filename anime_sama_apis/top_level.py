@@ -29,8 +29,8 @@ class AnimeSama:
     def _yield_catalogues_from(self, html: str) -> Generator[Catalogue]:
         text_without_script = re.sub(r"<script.+?</script>", "", html)
         for match in re.finditer(
-            rf"href=\"({self.site_url}catalogue/.+)\"[\W\w]+?src=\"(.+)\"[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<",
-            text_without_script,
+            rf"href=\"({self.site_url}catalogue/.+)\".+?src=\"(.+)\".+?>(.*)\n?<.+?>(.*)\n?<.+?>(.*)\n?<.+?>(.*)\n?<.+?>(.*)\n?<",
+            text_without_script
         ):
             url, image_url, name, alternative_names, genres, categories, languages = (
                 match.groups()

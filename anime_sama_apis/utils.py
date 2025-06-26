@@ -25,8 +25,8 @@ def split_and_strip(string: str, delimiters: Iterable[str] | str) -> list[str]:
 
 
 def remove_some_js_comments(string: str):
-    string = re.sub(r"\/\*[\W\w]*?\*\/", "", string)  # Remove /* ... */
-    return re.sub(r"<!--[\W\w]*?-->", "", string)  # Remove <!-- ... -->
+    string = re.sub(r"\/\*.*?\*\/", "", string)  # Remove /* ... */
+    return re.sub(r"<!--.*?-->", "", string)  # Remove <!-- ... -->
 
 
 # TODO: this callback_when_false is curse, should be remove
