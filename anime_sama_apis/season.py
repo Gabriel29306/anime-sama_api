@@ -80,7 +80,7 @@ class Season:
     # TODO: Refactor
     def _get_players_from(self, page: SeasonLangPage) -> list[Players]:
         players_list: list[str] = re.findall(
-            r"eps(\d+) ?= ?\[(.+?)\]", remove_some_js_comments(page.episodes_js)
+            r"eps(\d+) ?= ?\[([\W\w]+?)\]", remove_some_js_comments(page.episodes_js)
         )
         players_list = sorted(players_list, key=lambda tuple: tuple[0])
         players_list_links = (

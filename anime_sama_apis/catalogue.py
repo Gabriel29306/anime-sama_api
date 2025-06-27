@@ -96,7 +96,7 @@ class Catalogue:
         return search[0]
 
     async def synopsis(self) -> str:
-        search: list[str] = re.findall(r"Synopsis.+?>(.+)<", await self.page())
+        search: list[str] = re.findall(r"Synopsis[\W\w]+?>(.+)<", await self.page())
 
         if not search:
             return ""
