@@ -3,8 +3,8 @@ revision = 2
 requires-python = ">=3.10"
 
 [[package]]
-name = "anime-sama-api"
-version = "0.2.0.post1"
+name = "anime-sama-apis"
+version = "0.2.0.post2"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
