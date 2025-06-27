@@ -11,7 +11,6 @@ from .langs import Lang
 from .utils import filter_literal
 from .catalogue import Catalogue, Category
 
-SearchType: TypeAlias = Literal["Anime", "Film", "Scans", "Autres"]
 SearchLangs: TypeAlias = Literal["VOSTFR", "VASTFR", "VF"]
 
 logger = logging.getLogger(__name__)
@@ -65,7 +64,7 @@ class AnimeSama:
                 client=self.client,
             )
 
-    async def search(self, query: str, types: list[SearchType] = [], langs: list[SearchLangs] = [], limit: int | None = None) -> list[Catalogue]:
+    async def search(self, query: str, types: list[Category] = [], langs: list[SearchLangs] = [], limit: int | None = None) -> list[Catalogue]:
         suffix: str = ""
         for type in types:
             suffix += f"&type[]={type}"
