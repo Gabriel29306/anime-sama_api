@@ -40,3 +40,25 @@ def filter_literal(
     iterable: Iterable, lit: T, callback: Callable[[T], None]
 ) -> list[T]:
     return [value for value in iterable if is_literal(value, lit, callback)]
+
+def fix_categories(categories: Iterable[T]) -> Iterable[T]:
+    assoc = {
+        "Animes": "Anime",
+        "Autre": "Autres"
+    }
+    for i in range(len(categories)):
+        if assoc.get(categories[i]):
+            categories[i] = assoc[categories[i]]
+    return categories
+
+def unescape(string: str) -> str:
+    """
+    Unescape HTML entities in a string.
+
+    Args:
+        string (str): The string to unescape.
+
+    Returns:
+        str: The unescaped string.
+    """
+    return html_unescape(string)
