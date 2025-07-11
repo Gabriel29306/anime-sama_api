@@ -8,7 +8,7 @@ import re
 from httpx import AsyncClient, Response
 
 from .langs import Lang
-from .utils import filter_literal
+from .utils import filter_literal, fix_categories
 from .catalogue import Catalogue, Category
 
 SearchLangs: TypeAlias = Literal["VOSTFR", "VASTFR", "VF"]
@@ -45,7 +45,7 @@ class AnimeSama:
                 logger.warning(
                     f"Error while parsing '{value}'. \nPlease report this to the developer with the serie you are trying to access."
                 )
-
+            categories = fix_categories(categories)
             categories_checked: list[Category] = filter_literal(
                 categories, Category, not_in_literal
             )  # type: ignore
