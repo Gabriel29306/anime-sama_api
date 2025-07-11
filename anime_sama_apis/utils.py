@@ -2,6 +2,7 @@ import re
 from typing import TypeVar, get_args, Callable
 from itertools import zip_longest
 from collections.abc import Iterable
+from html import unescape as html_unescape
 
 T = TypeVar("T")
 

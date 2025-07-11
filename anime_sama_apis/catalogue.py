@@ -5,7 +5,7 @@ from httpx import AsyncClient
 
 from anime_sama_apis.langs import Lang
 
-from .utils import remove_some_js_comments
+from .utils import remove_some_js_comments, unescape
 from .season import Season
 from .langs import flags
 
@@ -38,11 +38,11 @@ class Catalogue:
         self.site_url: str = "/".join(url.split("/")[:3]) + "/"
         self.client: AsyncClient = client or AsyncClient()
 
-        self.name: str = name or url.split("/")[-2]
+        self.name: str = unescape(name or url.split("/")[-2])
 
         self._page: str | None = None
-        self.alternative_names: list[str] = alternative_names
-        self.genres: list[str] = genres
+        self.alternative_names: list[str] = [unescape(name) for name in alternative_names]
+        self.genres: list[str] = [unescape(genre) for genre in genres]
         self.categories: list[Category] = categories
         self.languages: list[Lang] = languages
         self.image_url: str = image_url
