@@ -75,8 +75,11 @@ class AnimeSama:
         response: Response = await self.client.get(query_url)
         response.raise_for_status()
 
+        try:
+            last_page: int = int(re.findall(r"page=(\d+)", response.text)[-1])
+        except IndexError:
+            return [] # No results found
 
-        last_page: int = int(re.findall(r"page=(\d+)", response.text)[-1])
         if limit is not None:
             last_page = min((limit // 48) + 1 if limit % 48 else (limit // 48), last_page)
 
@@ -101,7 +104,10 @@ class AnimeSama:
             await self.client.get(f"{self.site_url}catalogue/?search={query}")
         ).raise_for_status()
 
-        last_page = int(re.findall(r"page=(\d+)", response.text)[-1])
+        try:
+            last_page = int(re.findall(r"page=(\d+)", response.text)[-1])
+        except IndexError:
+            return # No results found
 
         for catalogue in self._yield_catalogues_from(response.text):
             yield catalogue
