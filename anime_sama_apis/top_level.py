@@ -85,7 +85,7 @@ class AnimeSama:
 
         responses: list[Response] = [response] + await asyncio.gather(
             *(
-                self.client.get(f"{self.site_url}catalogue/?search={query}&page={num}")
+                self.client.get(f"{self.site_url}catalogue/?search={query}&page={num}{suffix}")
                 for num in range(2, last_page + 1)
             )
         )
