@@ -54,7 +54,7 @@ class AnimeSama:
             )  # type: ignore
 
             yield Catalogue(
-                url=url,
+                url=url.strip(),
                 name=name,
                 alternative_names=alternative_names,
                 genres=genres,
