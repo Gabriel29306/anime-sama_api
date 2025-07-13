@@ -80,7 +80,7 @@ class Catalogue:
 
         return seasons
 
-    async def scans_seasons(self) -> list:
+    async def scans_seasons(self) -> list[ScanSeason]:
         page_without_comments: str = remove_some_js_comments(string=await self.page())
 
         seasons = re.findall(
