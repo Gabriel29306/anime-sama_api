@@ -7,6 +7,7 @@ from anime_sama_apis.langs import Lang
 
 from .utils import remove_some_js_comments, unescape
 from .season import Season
+from .scan_season import ScanSeason
 from .langs import flags
 
 
@@ -78,6 +79,26 @@ class Catalogue:
         ]
 
         return seasons
+
+    async def scans_seasons(self) -> list:
+        page_without_comments: str = remove_some_js_comments(string=await self.page())
+
+        seasons = re.findall(
+            r'panneauScan\("(.+?)", *"(.+?)(?:vostfr|vf)"\);', page_without_comments
+        )
+
+        seasons = [
+            ScanSeason(
+                url=self.url + link,
+                name=name,
+                serie_name=self.name,
+                client=self.client,
+            )
+            for name, link in seasons
+        ]
+
+        return seasons
+
 
     async def advancement(self) -> str:
         search = re.findall(r"Avancement.+?>(.+?)<", await self.page())
