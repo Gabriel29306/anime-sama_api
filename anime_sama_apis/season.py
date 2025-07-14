@@ -86,8 +86,22 @@ class Season:
         players_list_links = (
             re.findall(r"'(.+?)'", player) for _, player in players_list
         )
-
-        return [Players(players) for players in zip_varlen(*players_list_links)]
+        result = []
+        for players in zip_varlen(*players_list_links):
+            if not players:
+                continue
+            for player in players:
+                if player in [
+                    "https://vidmoly.to/embed-.html",
+                    "https://video.sibnet.ru/shell.php?videoid=",
+                    "https://sendvid.com/embed/",
+                    "https://vk.com/video_ext.php?oid=&hd=3"
+                ]:
+                    players.remove(player)
+            if not players:
+                continue
+            result.append(Players(players))
+        return result
 
     def _get_episodes_names(
         self, page: SeasonLangPage, number_of_episodes: int, number_of_episodes_max: int
