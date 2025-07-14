@@ -105,7 +105,7 @@ class AnimeSama:
 
             catalogues += list(self._yield_catalogues_from(response.text))
 
-        return catalogues[:limit] if limit is not None else catalogues
+        return catalogues[:limit] if limit else catalogues
 
     async def search_iter(self, query: str) -> AsyncIterator[Catalogue]:
         response: Response = (
