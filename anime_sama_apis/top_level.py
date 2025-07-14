@@ -67,12 +67,6 @@ class AnimeSama:
     async def search(self, query: str, types: list[Category] = [], langs: list[SearchLangs] = [], limit: int | None = None) -> list[Catalogue]:
         suffix: str = ""
 
-        if "Anime" in types:
-            types.append("Animes") # type: ignore
-
-        if "Scans" in types:
-            langs.append("Scans") # type: ignore only with "Watamote"
-
         for type in types:
             suffix += f"&type[]={type}"
         for lang in langs:
