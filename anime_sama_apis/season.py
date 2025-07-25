@@ -101,7 +101,6 @@ class Season:
             # Filtrer les lecteurs invalides en créant une nouvelle liste
             players_c = [player for player in players if player.lower() not in invalid_players]
             
-            print(players_c)
             if not players_c:
                 continue
             result.append(Players(players_c))
