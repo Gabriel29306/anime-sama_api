@@ -40,18 +40,24 @@ class Languages(dict[LangId, Players]):
     def consume_player(
         self, prefer_languages: list[Lang], index: int
     ) -> Generator[str]:
+        found_preferred = False
+        
         for prefer_language in prefer_languages:
             for players in self.availables.get(prefer_language, []):
                 if players:
+                    found_preferred = True
                     yield from players(index)
 
-        for language in lang2ids:
-            for players in self.availables.get(language, []):
-                if players:
-                    logger.warning(
-                        "Language preference not respected. Using %s", language
-                    )
-                    yield from players(index)
+        # Si aucune langue préférée n'a donné de résultats, essayer toutes les autres
+        if not found_preferred:
+            for language in lang2ids:
+                if language not in prefer_languages:
+                    for players in self.availables.get(language, []):
+                        if players:
+                            logger.warning(
+                                "Language preference not respected. Using %s", language
+                            )
+                            yield from players(index)
 
 
 @dataclass(frozen=True)
