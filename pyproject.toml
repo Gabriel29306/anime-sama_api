@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "anime_sama_apis"
-version = "0.4.3"
+version = "0.5.0"
 description = "Api for anime-sama.fr"
 authors = [
     {name = "NiniKo", email = "pcninik@gmail.com"},
@@ -29,7 +29,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "httpx>=0.28.1",
+    "cloudscraper>=1.2.71",
 ]
 
 [project.scripts]
