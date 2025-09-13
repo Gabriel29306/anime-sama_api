@@ -5,7 +5,8 @@ from urllib.parse import quote_plus
 import logging
 import re
 
-from httpx import AsyncClient, Response
+from cloudscraper import create_scraper, CloudScraper
+from requests import Response
 
 from .langs import Lang
 from .utils import filter_literal, fix_categories
@@ -17,13 +18,13 @@ logger = logging.getLogger(__name__)
 
 
 class AnimeSama:
-    def __init__(self, site_url: str, client: AsyncClient | None = None) -> None:
+    def __init__(self, site_url: str, client: CloudScraper | None = None) -> None:
         if not site_url.startswith("http"):
             site_url = f"https://{site_url}"
         if not site_url.endswith("/"):
             site_url += "/"
         self.site_url: str = site_url
-        self.client: AsyncClient = client or AsyncClient()
+        self.client: CloudScraper = client or create_scraper()
 
     def _yield_catalogues_from(self, html: str) -> Generator[Catalogue]:
         text_without_script: str = re.sub(r"<script.+?</script>", "", html)
@@ -73,7 +74,7 @@ class AnimeSama:
             suffix += f"&lang[]={lang}"
         query_url: str = f"{self.site_url}catalogue/?search={quote_plus(query)}{suffix}"
 
-        response: Response = await self.client.get(query_url)
+        response: Response = await asyncio.to_thread(self.client.get, query_url)
         response.raise_for_status()
 
         try:
@@ -87,14 +88,14 @@ class AnimeSama:
 
         responses: list[Response] = [response] + await asyncio.gather(
             *(
-                self.client.get(f"{self.site_url}catalogue/?search={query}&page={num}{suffix}")
+                asyncio.to_thread(self.client.get, f"{self.site_url}catalogue/?search={query}&page={num}{suffix}")
                 for num in range(2, last_page + 1)
             )
         )
 
         catalogues: list[Catalogue] = []
         for response in responses:
-            if not response.is_success:
+            if not response.ok:
                 continue
 
             catalogues += list(self._yield_catalogues_from(response.text))
@@ -103,8 +104,9 @@ class AnimeSama:
 
     async def search_iter(self, query: str) -> AsyncIterator[Catalogue]:
         response: Response = (
-            await self.client.get(f"{self.site_url}catalogue/?search={query}")
-        ).raise_for_status()
+            await asyncio.to_thread(self.client.get, f"{self.site_url}catalogue/?search={query}")
+        )
+        response.raise_for_status()
 
         try:
             last_page = int(re.findall(r"page=(\d+)", response.text)[-1])
@@ -115,11 +117,11 @@ class AnimeSama:
             yield catalogue
 
         for number in range(2, last_page + 1):
-            response = await self.client.get(
+            response = await asyncio.to_thread(self.client.get,
                 f"{self.site_url}catalogue/?search={query}&page={number}"
             )
 
-            if not response.is_success:
+            if not response.ok:
                 continue
 
             for catalogue in self._yield_catalogues_from(response.text):

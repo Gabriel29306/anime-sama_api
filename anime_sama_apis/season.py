@@ -5,7 +5,8 @@ import re
 import asyncio
 from typing import LiteralString, get_args
 
-from httpx import AsyncClient, Response
+from cloudscraper import create_scraper, CloudScraper
+from requests import Response
 
 from .langs import FlagId, LangId, lang2ids, flagid2lang
 from .episode import Episode, Players, Languages
@@ -25,7 +26,7 @@ class Season:
         url: str,
         name="",
         serie_name="",
-        client: AsyncClient | None = None,
+        client: CloudScraper | None = None,
     ) -> None:
         self.url: str = url
         self.site_url: str = "/".join(url.split("/")[:3]) + "/"
@@ -33,14 +34,14 @@ class Season:
         self.name: str = name or url.split("/")[-2]
         self.serie_name: str = serie_name or url.split("/")[-3]
 
-        self.client: AsyncClient = client or AsyncClient()
+        self.client: CloudScraper = client or create_scraper()
 
     async def get_all_pages(self) -> list[SeasonLangPage]:
         async def process_page(lang_id: LangId) -> SeasonLangPage:
             page_url: str = self.url + lang_id + "/"
-            response: Response = await self.client.get(page_url)
+            response: Response = await asyncio.to_thread(self.client.get, page_url)
 
-            if not response.is_success:
+            if not response.ok:
                 return SeasonLangPage(lang_id=lang_id)
 
             html: str = response.text
@@ -49,9 +50,9 @@ class Season:
             if not match_url:
                 return SeasonLangPage(lang_id=lang_id)
 
-            episodes_js: Response = await self.client.get(page_url + match_url.group(0))
+            episodes_js: Response = await asyncio.to_thread(self.client.get, page_url + match_url.group(0))
 
-            if not episodes_js.is_success:
+            if not episodes_js.ok:
                 return SeasonLangPage(lang_id=lang_id)
 
             return SeasonLangPage(

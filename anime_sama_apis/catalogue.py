@@ -1,7 +1,8 @@
 import re
 from typing import Literal
+import asyncio
 
-from httpx import AsyncClient
+from cloudscraper import create_scraper, CloudScraper
 
 from anime_sama_apis.langs import Lang
 
@@ -24,7 +25,7 @@ class Catalogue:
         categories: list[Category] | None = None,
         languages: list[Lang] | None = None,
         image_url="",
-        client: AsyncClient | None = None,
+        client: CloudScraper | None = None,
     ) -> None:
         if alternative_names is None:
             alternative_names = []
@@ -37,7 +38,7 @@ class Catalogue:
 
         self.url = url + "/" if url[-1] != "/" else url
         self.site_url: str = "/".join(url.split("/")[:3]) + "/"
-        self.client: AsyncClient = client or AsyncClient()
+        self.client: CloudScraper = client or create_scraper()
 
         self.name: str = unescape(name or url.split("/")[-2])
 
@@ -52,9 +53,9 @@ class Catalogue:
         if self._page is not None:
             return self._page
 
-        response = await self.client.get(self.url)
+        response = await asyncio.to_thread(self.client.get, self.url)
 
-        if not response.is_success:
+        if not response.ok:
             self._page = ""
         else:
             self._page = response.text
