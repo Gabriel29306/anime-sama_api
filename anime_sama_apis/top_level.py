@@ -17,6 +17,17 @@ SearchLangs: TypeAlias = Literal["VOSTFR", "VASTFR", "VF"]
 logger = logging.getLogger(__name__)
 
 
+catalogue_pattern = re.compile(
+    r'<div[^>]*class="[^"]*catalog-card[^"]*"[^>]*>.*?'
+    r'<a\s+href="([^"]+)".*?'
+    r'<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)".*?'
+    r'<p class="alternate-titles">\s*(.*?)\s*</p>.*?'
+    r'<span class="info-label">Genres</span>\s*<p class="info-value">\s*(.*?)\s*</p>.*?'
+    r'<span class="info-label">Types</span>\s*<p class="info-value">\s*(.*?)\s*</p>.*?'
+    r'<span class="info-label">Langues</span>\s*<p class="info-value">\s*(.*?)\s*</p>',
+    re.DOTALL | re.IGNORECASE
+)
+
 class AnimeSama:
     def __init__(self, site_url: str, client: CloudScraper | None = None) -> None:
         if not site_url.startswith("http"):
@@ -28,8 +39,8 @@ class AnimeSama:
 
     def _yield_catalogues_from(self, html: str) -> Generator[Catalogue]:
         text_without_script: str = re.sub(r"<script.+?</script>", "", html)
-        for match in re.finditer(
-            rf"href=\"({self.site_url}catalogue/.+)\"[\W\w]+?src=\"(.+)\"[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<[\W\w]+?>(.*)\n?<",
+        text_without_script = text_without_script.replace(".fr", ".org") if ".org" in self.site_url else text_without_script.replace(".org", ".fr")
+        for match in catalogue_pattern.finditer(
             text_without_script,
         ):
             url, image_url, name, alternative_names, genres, categories, languages = (
