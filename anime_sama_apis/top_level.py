@@ -91,7 +91,7 @@ class AnimeSama:
         try:
             last_page: int = int(re.findall(r"page=(\d+)", response.text)[-1])
         except IndexError:
-            return [] # No results found
+            last_page: int = 1
 
         if limit is not None:
             # There is a max of 48 results per pages

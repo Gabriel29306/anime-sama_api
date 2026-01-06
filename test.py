@@ -1,7 +1,7 @@
 from anime_sama_apis import AnimeSama
 import asyncio
 
-api = AnimeSama("anime-sama.org")
+api = AnimeSama("anime-sama.tv")
 
 async def main():
     results = await api.search("Solo Leveling", limit=2)
