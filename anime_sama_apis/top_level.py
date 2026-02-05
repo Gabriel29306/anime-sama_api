@@ -1,7 +1,7 @@
 import asyncio
 from collections.abc import AsyncIterator, Generator
 from typing import Literal, TypeAlias
-from urllib.parse import quote_plus
+from urllib.parse import quote_plus, urlparse
 import logging
 import re
 
@@ -32,6 +32,7 @@ class AnimeSama:
     def __init__(self, site_url: str, client: CloudScraper | None = None) -> None:
         if not site_url.startswith("http"):
             site_url = f"https://{site_url}"
+        self.tld = "." + urlparse(site_url).netloc.split(".")[-1]
         if not site_url.endswith("/"):
             site_url += "/"
         self.site_url: str = site_url
@@ -39,13 +40,15 @@ class AnimeSama:
 
     def _yield_catalogues_from(self, html: str) -> Generator[Catalogue]:
         text_without_script: str = re.sub(r"<script.+?</script>", "", html)
-        text_without_script = text_without_script.replace(".fr", ".org") if ".org" in self.site_url else text_without_script.replace(".org", ".fr")
+        text_without_script = text_without_script
         for match in catalogue_pattern.finditer(
             text_without_script,
         ):
             url, image_url, name, alternative_names, genres, categories, languages = (
                 match.groups()
             )
+            if (tld := urlparse(url).netloc.split(".")[-1]) != self.tld[1:]:
+                url = url.replace("." + tld, self.tld)
             alternative_names = (
                 alternative_names.split(", ") if alternative_names else []
             )
