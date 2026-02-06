@@ -32,5 +32,9 @@ class Fetcher:
         self.client.quit() # Exit browser, we don't need it anymore, we have cookies.
     
     def get(self, url: str, retry: Literal[False] | None = None) -> Response:
-        self.client.get(url, show_errmsg=False, retry=retry)
+        self.client.get(url, retry=retry)
         return self.client.response
+    
+    def get_html_elem(self, url, selector):
+        self.client.get(url)
+        return self.client.ele(selector)

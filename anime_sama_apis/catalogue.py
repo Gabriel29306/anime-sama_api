@@ -83,7 +83,7 @@ class Catalogue:
 
         return seasons
 
-    """ async def scans_seasons(self) -> list[ScanSeason]:
+    async def scans_seasons(self) -> list[ScanSeason]:
         page_without_comments: str = remove_some_js_comments(string=await self.page())
 
         seasons = re.findall(
@@ -100,7 +100,7 @@ class Catalogue:
             for name, link in seasons
         ]
 
-        return seasons """
+        return seasons
 
 
     async def advancement(self) -> str:
