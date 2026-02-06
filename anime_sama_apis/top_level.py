@@ -5,12 +5,14 @@ from urllib.parse import quote_plus, urlparse
 import logging
 import re
 
-from cloudscraper import create_scraper, CloudScraper
+from DrissionPage import ChromiumOptions, WebPage
 from requests import Response
 
 from .langs import Lang
 from .utils import filter_literal, fix_categories
 from .catalogue import Catalogue, Category
+
+from .fetcher import Fetcher
 
 SearchLangs: TypeAlias = Literal["VOSTFR", "VASTFR", "VF"]
 
@@ -29,14 +31,20 @@ catalogue_pattern = re.compile(
 )
 
 class AnimeSama:
-    def __init__(self, site_url: str, client: CloudScraper | None = None) -> None:
+    def __init__(
+            self,
+            site_url: str,
+            client: WebPage | None = None,
+            client_options: ChromiumOptions | None = None
+        ) -> None:
         if not site_url.startswith("http"):
             site_url = f"https://{site_url}"
         self.tld = "." + urlparse(site_url).netloc.split(".")[-1]
         if not site_url.endswith("/"):
             site_url += "/"
         self.site_url: str = site_url
-        self.client: CloudScraper = client or create_scraper()
+        self.client = Fetcher(site_url, client, client_options)
+
 
     def _yield_catalogues_from(self, html: str) -> Generator[Catalogue]:
         text_without_script: str = re.sub(r"<script.+?</script>", "", html)

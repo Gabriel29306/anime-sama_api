@@ -1,8 +1,7 @@
 import re
 from typing import Literal
 import asyncio
-
-from cloudscraper import create_scraper, CloudScraper
+from urllib.parse import urlparse
 
 from anime_sama_apis.langs import Lang
 
@@ -10,6 +9,8 @@ from .utils import remove_some_js_comments, unescape
 from .season import Season
 from .scan_season import ScanSeason
 from .langs import flags
+
+from .fetcher import Fetcher
 
 
 Category = Literal["Anime", "Scans", "Film", "Autres"]
@@ -25,7 +26,7 @@ class Catalogue:
         categories: list[Category] | None = None,
         languages: list[Lang] | None = None,
         image_url="",
-        client: CloudScraper | None = None,
+        client: Fetcher | None = None,
     ) -> None:
         if alternative_names is None:
             alternative_names = []
@@ -38,7 +39,8 @@ class Catalogue:
 
         self.url = url + "/" if url[-1] != "/" else url
         self.site_url: str = "/".join(url.split("/")[:3]) + "/"
-        self.client: CloudScraper = client or create_scraper()
+        parsed_url = urlparse(url)
+        self.client: Fetcher = client or Fetcher(f"{parsed_url.scheme}://{parsed_url.netloc}")
 
         self.name: str = unescape(name or url.split("/")[-2])
 
@@ -81,7 +83,7 @@ class Catalogue:
 
         return seasons
 
-    async def scans_seasons(self) -> list[ScanSeason]:
+    """ async def scans_seasons(self) -> list[ScanSeason]:
         page_without_comments: str = remove_some_js_comments(string=await self.page())
 
         seasons = re.findall(
@@ -98,7 +100,7 @@ class Catalogue:
             for name, link in seasons
         ]
 
-        return seasons
+        return seasons """
 
 
     async def advancement(self) -> str:

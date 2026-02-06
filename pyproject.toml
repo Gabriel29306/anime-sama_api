@@ -29,7 +29,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "cloudscraper>=1.2.71",
+    "DrissionPage>=4.1.0.0",
 ]
 
 [project.urls]
