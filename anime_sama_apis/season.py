@@ -3,15 +3,15 @@ from dataclasses import dataclass, replace
 from functools import reduce
 import re
 import asyncio
-from typing import LiteralString, get_args
+from typing import get_args
+from urllib.parse import urlparse
 
-from cloudscraper import create_scraper, CloudScraper
 from requests import Response
 
 from .langs import FlagId, LangId, lang2ids, flagid2lang
 from .episode import Episode, Players, Languages
 from .utils import remove_some_js_comments, zip_varlen, split_and_strip
-
+from .fetcher import Fetcher
 
 @dataclass
 class SeasonLangPage:
@@ -26,7 +26,7 @@ class Season:
         url: str,
         name="",
         serie_name="",
-        client: CloudScraper | None = None,
+        client: Fetcher | None = None,
     ) -> None:
         self.url: str = url
         self.site_url: str = "/".join(url.split("/")[:3]) + "/"
@@ -34,12 +34,13 @@ class Season:
         self.name: str = name or url.split("/")[-2]
         self.serie_name: str = serie_name or url.split("/")[-3]
 
-        self.client: CloudScraper = client or create_scraper()
+        parsed_url = urlparse(url)
+        self.client: Fetcher = client or Fetcher(f"{parsed_url.scheme}://{parsed_url.netloc}")
 
     async def get_all_pages(self) -> list[SeasonLangPage]:
         async def process_page(lang_id: LangId) -> SeasonLangPage:
             page_url: str = self.url + lang_id + "/"
-            response: Response = await asyncio.to_thread(self.client.get, page_url)
+            response: Response = await asyncio.to_thread(self.client.get, page_url, False)
 
             if not response.ok:
                 return SeasonLangPage(lang_id=lang_id)
@@ -117,7 +118,7 @@ class Season:
         )[-1]
         functions_list: list[str] = split_and_strip(functions, (";", "\n"))[:-1]
 
-        def padding(n: int) -> LiteralString:
+        def padding(n: int) -> str:
             return " " * (len(str(number_of_episodes_max)) - len(str(n)))
 
         def episode_name_range(*args) -> list[str]:
