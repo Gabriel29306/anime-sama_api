@@ -51,7 +51,7 @@ class Season:
             if not match_url:
                 return SeasonLangPage(lang_id=lang_id)
 
-            episodes_js: Response = await asyncio.to_thread(self.client.get, page_url + match_url.group(0))
+            episodes_js: Response = await asyncio.to_thread(self.client.get, page_url + match_url.group(0), 1)
 
             if not episodes_js or not episodes_js.ok:
                 return SeasonLangPage(lang_id=lang_id)
