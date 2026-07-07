@@ -53,7 +53,7 @@ class Season:
 
             episodes_js: Response = await asyncio.to_thread(self.client.get, page_url + match_url.group(0))
 
-            if not episodes_js.ok:
+            if not episodes_js or not episodes_js.ok:
                 return SeasonLangPage(lang_id=lang_id)
 
             return SeasonLangPage(
@@ -210,9 +210,10 @@ class Season:
 
         players_list: list[list[Players]] = [self._get_players_from(page) for page in pages]
 
-        number_of_episodes_max = max(
-            len(episodes_page) for episodes_page in players_list
-        )
+        numbers_of_episodes = [len(episodes_page) for episodes_page in players_list]
+        numbers_of_episodes.append(0)
+
+        number_of_episodes_max = max(numbers_of_episodes)
 
         episodes_names = [
             self._get_episodes_names(page, len(episodes_page), number_of_episodes_max)
