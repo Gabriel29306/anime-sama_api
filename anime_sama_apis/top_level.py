@@ -20,13 +20,14 @@ logger = logging.getLogger(__name__)
 
 
 catalogue_pattern = re.compile(
-    r'<div[^>]*class="[^"]*catalog-card[^"]*"[^>]*>.*?'
-    r'<a\s+href="([^"]+)".*?'
-    r'<img[^>]*src="([^"]+)"[^>]*alt="([^"]+)".*?'
-    r'<p class="alternate-titles">\s*(.*?)\s*</p>.*?'
-    r'<span class="info-label">Genres</span>\s*<p class="info-value">\s*(.*?)\s*</p>.*?'
-    r'<span class="info-label">Types</span>\s*<p class="info-value">\s*(.*?)\s*</p>.*?'
-    r'<span class="info-label">Langues</span>\s*<p class="info-value">\s*(.*?)\s*</p>',
+    r"<div[^>]*class=\"[^\"]*catalog-card[^\"]*\"[^>]*>.*?"
+    r"<a\s+href=\"(?P<url>[^\"]+)\".*?"
+    r"<img[^>]*src=\"(?P<image_url>[^\"]+)\".*?"
+    r"<h2 class=\"card-title\">\s*(?P<name>[^<]*)\s*</h2>.*?"
+    r"<p class=\"alternate-titles\">\s*(?P<alternative_names>[^<]*)\s*</p>.*?"
+    r"Genres\s*</span>\s*<div class=\"genre-tags\">(?P<genres>.*?)</div>.*?"
+    r"Types\s*</span>.*?<p class=\"info-value\">\s*(?P<categories>[^<]*)\s*</p>.*?"
+    r"Langues\s*</span>\s*<div class=\"lang-flags\">(?P<languages>.*?)</div>",
     re.DOTALL | re.IGNORECASE
 )
 
@@ -48,26 +49,34 @@ class AnimeSama:
 
     def _yield_catalogues_from(self, html: str) -> Generator[Catalogue]:
         text_without_script: str = re.sub(r"<script.+?</script>", "", html)
-        text_without_script = text_without_script
-        for match in catalogue_pattern.finditer(
-            text_without_script,
-        ):
-            url, image_url, name, alternative_names, genres, categories, languages = (
-                match.groups()
-            )
+
+        for match in catalogue_pattern.finditer(text_without_script):
+            url = match.group("url")
+            image_url = match.group("image_url")
+            name = match.group("name")
+            alt_names_raw = match.group("alternative_names")
+            genres_raw = match.group("genres")
+            categories_raw = match.group("categories")
+            languages_raw = match.group("languages")
+
             if (tld := urlparse(url).netloc.split(".")[-1]) != self.tld[1:]:
                 url = url.replace("." + tld, self.tld)
+
             alternative_names = (
-                alternative_names.split(", ") if alternative_names else []
+                alt_names_raw.split(", ") if alt_names_raw else []
             )
-            genres = genres.split(", ") if genres else []
-            categories = categories.split(", ") if categories else []
-            languages = languages.split(", ") if languages else []
+
+            genres = re.findall(r">([^<]+)</span>", genres_raw) if genres_raw else []
+
+            categories = categories_raw.split(", ") if categories_raw else []
+
+            languages = re.findall(r"title=\"([^\"]+)\"", languages_raw) if languages_raw else []
 
             def not_in_literal(value) -> None:
                 logger.warning(
-                    f"Error while parsing '{value}'. \nPlease report this to the developer with the serie you are trying to access."
+                    f"Error while parsing \"{value}\". \nPlease report this to the developer with the serie you are trying to access."
                 )
+
             categories = fix_categories(categories)
             categories_checked: list[Category] = filter_literal(
                 categories, Category, not_in_literal
@@ -86,6 +95,7 @@ class AnimeSama:
                 image_url=image_url,
                 client=self.client,
             )
+
 
     async def search(self, query: str, types: list[Category] = [], langs: list[SearchLangs] = [], limit: int | None = None) -> list[Catalogue]:
         suffix: str = ""
