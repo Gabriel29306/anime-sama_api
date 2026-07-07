@@ -28,10 +28,14 @@ class Fetcher:
                 )
             self.client = WebPage(mode="d", chromium_options=self.options) # type: ignore
         self.client.get(domain)
+        self.client.wait.ele_displayed(".asn-logo")
+        print(self.client.title)
         self.client.change_mode("s", go=False)
         self.client.quit() # Exit browser, we don't need it anymore, we have cookies.
     
-    def get(self, url: str, retry: Literal[False] | None = None) -> Response:
+    def get(self, url: str, retry: Literal[False] | int | None = None) -> Response:
+        if retry == False:
+            retry = 0
         self.client.get(url, retry=retry)
         return self.client.response
     
