@@ -24,7 +24,7 @@ class Fetcher:
                 self.options.set_argument("--blink-settings=imagesEnabled=false")
                 # self.options.set_browser_path("/usr/bin/chromium")
                 self.options.set_user_agent(
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36"
+                    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
                 )
             self.client = WebPage(mode="d", chromium_options=self.options) # type: ignore
         self.client.get(domain)
