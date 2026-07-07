@@ -46,7 +46,7 @@ class Catalogue:
 
         self._page: str | None = None
         self.alternative_names: list[str] = [unescape(name) for name in alternative_names]
-        self.genres: list[str] = [unescape(genre) for genre in genres]
+        self._raw_genres: list[str] = [unescape(genre) for genre in genres]
         self.categories: list[Category] = categories
         self.languages: list[Lang] = languages
         self.image_url: str = image_url
@@ -63,6 +63,14 @@ class Catalogue:
             self._page = response.text
 
         return self._page
+
+    async def genres(self) -> list[str]:
+        if "..." not in self._raw_genres and "…" not in self._raw_genres:
+            return self._raw_genres
+
+        # There is hidden gender from the "..." or "…" in the raw genres, we need to get it from the page
+        return re.findall(r'class=\"genre-pill\">([^<]+)</span>', await self.page(), re.DOTALL)
+
 
     async def seasons(self) -> list[Season]:
         page_without_comments: str = remove_some_js_comments(string=await self.page())
